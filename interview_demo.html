@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reinsurance document retrieval prototype</title>
+<style>
+  :root { color-scheme: light; --navy:#17324d; --blue:#2e638b; --ink:#20252b; --muted:#65717c; --line:#d7e0e7; --soft:#f3f7fa; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; color:var(--ink); background:#fff; line-height:1.55; }
+  main { max-width:960px; margin:0 auto; padding:48px 24px 64px; }
+  h1 { color:var(--navy); font-size:34px; margin:0 0 8px; }
+  h2 { color:var(--navy); font-size:20px; margin:0 0 18px; }
+  .subtitle { color:var(--muted); margin:0 0 24px; }
+  .status { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:28px 0 36px; }
+  .status div { background:var(--soft); padding:16px; border-radius:8px; }
+  .status strong { display:block; color:var(--navy); font-size:18px; }
+  .status span { color:var(--muted); font-size:14px; }
+  .example { padding:30px 0; border-top:1px solid var(--line); }
+  .eyebrow { color:var(--blue); text-transform:uppercase; letter-spacing:.08em; font-size:12px; font-weight:700; margin:0 0 6px; }
+  .answer { background:var(--soft); padding:18px; border-radius:8px; margin-bottom:18px; }
+  .answer p:not(.eyebrow) { margin:0 0 10px; }
+  code { color:var(--navy); font-size:13px; }
+  ol { margin:0; padding:0; list-style:none; }
+  li { margin:10px 0 14px; }
+  .rank-head { display:flex; justify-content:space-between; gap:16px; }
+  .bar { height:7px; background:#e9eef2; border-radius:5px; margin-top:6px; overflow:hidden; }
+  .bar span { display:block; height:100%; background:var(--blue); }
+  details { margin-top:18px; }
+  summary { color:var(--blue); cursor:pointer; }
+  pre { white-space:pre-wrap; background:#111a22; color:#edf5fb; padding:16px; border-radius:8px; overflow-wrap:anywhere; font-size:12px; }
+  .caveat { border-left:4px solid var(--blue); padding:4px 0 4px 16px; margin:32px 0 0; color:var(--muted); }
+  @media (max-width:650px) { .status { grid-template-columns:1fr; } h1 { font-size:28px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Reinsurance document retrieval prototype</h1>
+  <p class="subtitle">A small Python demonstration of the retrieval stage that could feed a future approved language model.</p>
+  <div class="status">
+    <div><strong>4</strong><span>synthetic documents</span></div>
+    <div><strong>12/12</strong><span>top-document results on the hand-written smoke test</span></div>
+    <div><strong>No LLM call</strong><span>retrieval and prompt construction only</span></div>
+  </div>
+  
+    <section class="example">
+      <p class="eyebrow">Question</p>
+      <h2>When should an underwriter escalate a referral?</h2>
+      <div class="answer">
+        <p class="eyebrow">Top retrieved passage</p>
+        <p>A referral is required when requested limits exceed delegated authority, the loss history shows an unexplained deterioration, a prohibited occupancy appears, or the available information does not support a defensible view of the risk.</p>
+        <code>[underwriting_guidelines.md#chunk-3]</code>
+      </div>
+      <div class="ranking">
+        <p class="eyebrow">Top three ranked chunks</p>
+        <ol>
+        <li>
+          <div class="rank-head"><code>[underwriting_guidelines.md#chunk-3]</code><span>0.328</span></div>
+          <div class="bar"><span style="width:100.0%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[claims_triage.md#chunk-3]</code><span>0.194</span></div>
+          <div class="bar"><span style="width:59.2%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[treaty_review.md#chunk-3]</code><span>0.148</span></div>
+          <div class="bar"><span style="width:45.3%"></span></div>
+        </li>
+        </ol>
+      </div>
+      <details>
+        <summary>Show the grounded prompt built for a future LLM step</summary>
+        <pre>Answer the question only from the supplied context. Cite every material claim. If the context is insufficient, say so. Do not make an underwriting or claims decision.
+
+Question: When should an underwriter escalate a referral?
+
+Context:
+[underwriting_guidelines.md#chunk-3] A referral is required when requested limits exceed delegated authority, the loss history shows an unexplained deterioration, a prohibited occupancy appears, or the available information does not support a defensible view of the risk.
+
+[claims_triage.md#chunk-3] The case owner reviews reserves when new evidence changes the expected loss, recovery, or expense. Every reserve change requires a reason, supporting evidence, and an audit record.
+
+[treaty_review.md#chunk-3] Ambiguous wording must not be silently interpreted by an automated system. The reviewer records the competing interpretations, source clauses, financial effect, and required legal or underwriting referral.</pre>
+      </details>
+    </section>
+    
+    <section class="example">
+      <p class="eyebrow">Question</p>
+      <h2>How are reserves reviewed?</h2>
+      <div class="answer">
+        <p class="eyebrow">Top retrieved passage</p>
+        <p>The case owner reviews reserves when new evidence changes the expected loss, recovery, or expense. Every reserve change requires a reason, supporting evidence, and an audit record.</p>
+        <code>[claims_triage.md#chunk-3]</code>
+      </div>
+      <div class="ranking">
+        <p class="eyebrow">Top three ranked chunks</p>
+        <ol>
+        <li>
+          <div class="rank-head"><code>[claims_triage.md#chunk-3]</code><span>0.273</span></div>
+          <div class="bar"><span style="width:100.0%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[treaty_review.md#chunk-1]</code><span>0.084</span></div>
+          <div class="bar"><span style="width:30.7%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[claims_triage.md#chunk-2]</code><span>0.078</span></div>
+          <div class="bar"><span style="width:28.4%"></span></div>
+        </li>
+        </ol>
+      </div>
+      <details>
+        <summary>Show the grounded prompt built for a future LLM step</summary>
+        <pre>Answer the question only from the supplied context. Cite every material claim. If the context is insufficient, say so. Do not make an underwriting or claims decision.
+
+Question: How are reserves reviewed?
+
+Context:
+[claims_triage.md#chunk-3] The case owner reviews reserves when new evidence changes the expected loss, recovery, or expense. Every reserve change requires a reason, supporting evidence, and an audit record.
+
+[treaty_review.md#chunk-1] This synthetic document is for software demonstration only. Treaty review compares the parties, period, territory, covered business, limits, retention, exclusions, reinstatements, reporting duties, premium terms, claims-control clauses, and governing law.
+
+[claims_triage.md#chunk-2] Claims involving possible fraud, sanctions, litigation, medical information, severe bodily injury, or a material coverage dispute require specialist review. The system may identify the referral condition but cannot make the final decision.</pre>
+      </details>
+    </section>
+    
+    <section class="example">
+      <p class="eyebrow">Question</p>
+      <h2>How should treaty ambiguities be handled?</h2>
+      <div class="answer">
+        <p class="eyebrow">Top retrieved passage</p>
+        <p>Reviewers compare the signed wording with the placement summary and recorded approvals. Any mismatch must be listed with the relevant clause and sent to the treaty owner for resolution.</p>
+        <code>[treaty_review.md#chunk-2]</code>
+      </div>
+      <div class="ranking">
+        <p class="eyebrow">Top three ranked chunks</p>
+        <ol>
+        <li>
+          <div class="rank-head"><code>[treaty_review.md#chunk-2]</code><span>0.212</span></div>
+          <div class="bar"><span style="width:100.0%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[treaty_review.md#chunk-1]</code><span>0.123</span></div>
+          <div class="bar"><span style="width:58.3%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[claims_triage.md#chunk-1]</code><span>0.119</span></div>
+          <div class="bar"><span style="width:56.3%"></span></div>
+        </li>
+        </ol>
+      </div>
+      <details>
+        <summary>Show the grounded prompt built for a future LLM step</summary>
+        <pre>Answer the question only from the supplied context. Cite every material claim. If the context is insufficient, say so. Do not make an underwriting or claims decision.
+
+Question: How should treaty ambiguities be handled?
+
+Context:
+[treaty_review.md#chunk-2] Reviewers compare the signed wording with the placement summary and recorded approvals. Any mismatch must be listed with the relevant clause and sent to the treaty owner for resolution.
+
+[treaty_review.md#chunk-1] This synthetic document is for software demonstration only. Treaty review compares the parties, period, territory, covered business, limits, retention, exclusions, reinstatements, reporting duties, premium terms, claims-control clauses, and governing law.
+
+[claims_triage.md#chunk-1] This synthetic document is for software demonstration only. On receipt of a claim notification, the claims team records the event date, policy or treaty reference, claimant, loss description, estimated amount, jurisdiction, and supporting documents.</pre>
+      </details>
+    </section>
+    
+    <section class="example">
+      <p class="eyebrow">Question</p>
+      <h2>Who can access personal or medical information?</h2>
+      <div class="answer">
+        <p class="eyebrow">Top retrieved passage</p>
+        <p>This synthetic document is for software demonstration only. Access to personal, medical, claims, and commercially sensitive information follows least-privilege rules and approved business purposes. Data must not be sent to an external model unless the service, region, retention terms, and contract have been approved.</p>
+        <code>[data_governance.md#chunk-1]</code>
+      </div>
+      <div class="ranking">
+        <p class="eyebrow">Top three ranked chunks</p>
+        <ol>
+        <li>
+          <div class="rank-head"><code>[data_governance.md#chunk-1]</code><span>0.284</span></div>
+          <div class="bar"><span style="width:100.0%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[claims_triage.md#chunk-2]</code><span>0.176</span></div>
+          <div class="bar"><span style="width:61.7%"></span></div>
+        </li>
+        
+        <li>
+          <div class="rank-head"><code>[underwriting_guidelines.md#chunk-3]</code><span>0.091</span></div>
+          <div class="bar"><span style="width:32.0%"></span></div>
+        </li>
+        </ol>
+      </div>
+      <details>
+        <summary>Show the grounded prompt built for a future LLM step</summary>
+        <pre>Answer the question only from the supplied context. Cite every material claim. If the context is insufficient, say so. Do not make an underwriting or claims decision.
+
+Question: Who can access personal or medical information?
+
+Context:
+[data_governance.md#chunk-1] This synthetic document is for software demonstration only. Access to personal, medical, claims, and commercially sensitive information follows least-privilege rules and approved business purposes. Data must not be sent to an external model unless the service, region, retention terms, and contract have been approved.
+
+[claims_triage.md#chunk-2] Claims involving possible fraud, sanctions, litigation, medical information, severe bodily injury, or a material coverage dispute require specialist review. The system may identify the referral condition but cannot make the final decision.
+
+[underwriting_guidelines.md#chunk-3] A referral is required when requested limits exceed delegated authority, the loss history shows an unexplained deterioration, a prohibited occupancy appears, or the available information does not support a defensible view of the risk.</pre>
+      </details>
+    </section>
+    
+  <p class="caveat">This is a learning prototype, not an underwriting or claims tool. The smoke test is small and uses synthetic data. It does not prove answer correctness, generalisation, privacy, or production readiness.</p>
+</main>
+</body>
+</html>
